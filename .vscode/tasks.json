@@ -1,0 +1,68 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run Streamlit App",
+			"type": "shell",
+			"command": "streamlit run app.py --server.port 8515",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Run Streamlit App",
+			"type": "shell",
+			"command": "C:/Users/Nishanth/Documents/fake_news_project/venv/Scripts/python.exe -m streamlit run app.py --server.port 8515",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Run Streamlit App",
+			"type": "shell",
+			"command": "C:/Users/Nishanth/Documents/fake_news_project/venv/Scripts/python.exe -m streamlit run app.py --server.port 8517",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Run Streamlit App",
+			"type": "shell",
+			"command": "C:/Users/Nishanth/Documents/fake_news_project/venv/Scripts/python.exe -m streamlit run app.py --server.port 8518",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Run Streamlit App",
+			"type": "shell",
+			"command": "C:/Users/Nishanth/Documents/fake_news_project/venv/Scripts/python.exe -m streamlit run app.py --server.port 8521",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Run Streamlit App",
+			"type": "shell",
+			"command": "C:/Users/Nishanth/Documents/fake_news_project/venv/Scripts/python.exe -m streamlit run app.py --server.port 8522",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		},
+		{
+			"label": "Run Streamlit App",
+			"type": "shell",
+			"command": "C:/Users/Nishanth/Documents/fake_news_project/venv/Scripts/python.exe -m streamlit run app.py --server.port 8525",
+			"args": [],
+			"isBackground": false,
+			"problemMatcher": [],
+			"group": "build"
+		}
+	]
+}
