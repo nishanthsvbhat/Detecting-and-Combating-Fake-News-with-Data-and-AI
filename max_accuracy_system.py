@@ -1,5 +1,5 @@
 """
-🎯 MAXIMUM ACCURACY SYSTEM - ZERO PROBLEMS GUARANTEED
+MAXIMUM ACCURACY SYSTEM - ZERO PROBLEMS GUARANTEED
 
 This is the PRODUCTION-READY version with:
 ✅ Fixed ML model compatibility
@@ -31,7 +31,7 @@ class MaxAccuracyMisinformationSystem:
     """
     MAXIMUM ACCURACY MISINFORMATION DETECTION SYSTEM
     
-    🎯 Zero-Error Production System with:
+    Zero-Error Production System with:
     1. ✅ LLM (Large Language Models) - Google Gemini with fallback
     2. ✅ Data Analytics - Multi-source verification with backups
     3. ✅ Machine Learning - Enhanced accuracy with robust models
@@ -98,7 +98,7 @@ class MaxAccuracyMisinformationSystem:
             api_key = self.api_keys.get('gemini_api')
             if api_key:
                 try:
-                    print("🔄 Initializing LLM with provided GEMINI_API_KEY...")
+                    print("Initializing LLM with provided GEMINI_API_KEY...")
                     genai.configure(api_key=api_key)
                     self.llm_model = genai.GenerativeModel('gemini-1.5-flash')
                     # Test
@@ -106,15 +106,15 @@ class MaxAccuracyMisinformationSystem:
                     if test_response and test_response.text:
                         self.llm_available = True
                         self.working_api_key = api_key
-                        print("✅ LLM Connected successfully")
+                        print("LLM Connected successfully")
                 except Exception as e:
-                    print(f"❌ LLM key failed: {str(e)[:60]}")
+                    print(f"LLM key failed: {str(e)[:60]}")
             
             if not self.llm_available:
-                print("⚠️ No valid GEMINI_API_KEY or connection failed - using intelligent simulation")
+                print("No valid GEMINI_API_KEY or connection failed - using intelligent simulation")
                 self.llm_available = True  # keep UI green and use simulation
                 self.llm_model = None
-                print("📍 LLM set to active mode with intelligent simulation")
+                print("LLM set to active mode with intelligent simulation")
             
             # Advanced prompt templates
             self.prompt_templates = {
@@ -852,8 +852,7 @@ class MaxAccuracyMisinformationSystem:
 
 def main():
     st.set_page_config(
-        page_title="🎯 Detecting and Combating Fake News with Data and AI",
-        page_icon="🎯",
+        page_title="Detecting and Combating Fake News with Data and AI",
         layout="wide"
     )
     
@@ -939,19 +938,19 @@ def main():
     # Header
     st.markdown("""
     <div class="main-header">
-        <h1>🎯 Detecting and Combating Fake News with Data and AI</h1>
+        <h1>Detecting and Combating Fake News with Data and AI</h1>
         <p>Advanced AI System | LLM + Data Analytics + ML + Prompt Engineering</p>
     </div>
     """, unsafe_allow_html=True)
     
     # Initialize system with force refresh
-    if 'system' not in st.session_state or st.button("🔄 Refresh System", help="Click if results seem incorrect"):
-        with st.spinner("🔧 Initializing Maximum Accuracy System..."):
+    if 'system' not in st.session_state or st.button("Refresh System", help="Click if results seem incorrect"):
+        with st.spinner("Initializing Maximum Accuracy System..."):
             st.session_state.system = MaxAccuracyMisinformationSystem()
             st.success("✅ System refreshed successfully!")
     
     # Input section
-    st.subheader("🔍 Content Analysis")
+    st.subheader("Content Analysis")
     content = st.text_area(
         "Enter content to analyze:", 
         placeholder="Enter news, social media post, or any content to verify...",
@@ -963,7 +962,7 @@ def main():
         st.session_state.binary_mode = True
     st.session_state.binary_mode = st.checkbox("Strict Binary Output (True/False)", value=st.session_state.binary_mode, help="When enabled, the system maps nuanced verdicts to a strict TRUE or FALSE with conservative safety rules.")
     
-    if st.button("🎯 ANALYZE WITH AI SYSTEM", type="primary"):
+    if st.button("ANALYZE WITH AI SYSTEM", type="primary"):
         if content.strip():
             with st.spinner("🔍 Running comprehensive analysis..."):
                 try:
@@ -1021,7 +1020,7 @@ def main():
                         else:
                             st.markdown(f"""
                             <div class="verdict-unverifiable">
-                                ⚠️ {display_verdict} | Confidence: {display_confidence}%
+                                {display_verdict} | Confidence: {display_confidence}%
                             </div>
                             """, unsafe_allow_html=True)
                         
@@ -1031,7 +1030,7 @@ def main():
                         # Performance metrics
                         st.markdown("""
                         <div class="metric-card">
-                            <h4>🎯 System Performance</h4>
+                            <h4>System Performance</h4>
                         </div>
                         """, unsafe_allow_html=True)
                         
@@ -1048,7 +1047,7 @@ def main():
                         # Component 1: Data Analytics
                         st.markdown("""
                         <div class="analysis-section">
-                            <h4>🔍 1. Data Analytics Component</h4>
+                            <h4>1. Data Analytics Component</h4>
                         </div>
                         """, unsafe_allow_html=True)
                         
@@ -1056,33 +1055,32 @@ def main():
                         
                         col_a, col_b, col_c = st.columns(3)
                         with col_a:
-                            st.metric("📰 Total Sources", sources['total_sources'])
+                            st.metric("Total Sources", sources['total_sources'])
                         with col_b:
-                            st.metric("🏆 Trusted Sources", sources['trusted_sources'])
+                            st.metric("Trusted Sources", sources['trusted_sources'])
                         with col_c:
                             trust_ratio = (sources['trusted_sources'] / max(sources['total_sources'], 1)) * 100
-                            st.metric("📈 Trust Ratio", f"{trust_ratio:.1f}%")
+                            st.metric("Trust Ratio", f"{trust_ratio:.1f}%")
                         
                         # API Status
                         api_status = sources.get('api_status', {})
                         for api, status in api_status.items():
-                            status_color = "🟢" if status == "SUCCESS" else "🟡"
-                            st.write(f"{status_color} **{api}**: {status}")
+                            st.write(f"**{api}**: {status}")
                         
                         # Search Terms Used
                         if 'search_terms' in sources:
-                            st.write("🔍 **Search Terms Used:**", ", ".join(sources['search_terms']))
+                            st.write("**Search Terms Used:**", ", ".join(sources['search_terms']))
                         
                         # Top Headlines (if available)
                         if sources.get('headlines'):
-                            st.write("📰 **Related Headlines Found:**")
+                            st.write("**Related Headlines Found:**")
                             for i, headline in enumerate(sources['headlines'][:3], 1):
                                 st.write(f"{i}. {headline}")
                         
                         # Component 2: Machine Learning
                         st.markdown("""
                         <div class="analysis-section">
-                            <h4>🧠 2. Machine Learning Component</h4>
+                            <h4>2. Machine Learning Component</h4>
                         </div>
                         """, unsafe_allow_html=True)
                         
@@ -1090,17 +1088,15 @@ def main():
                         
                         col_a, col_b, col_c = st.columns(3)
                         with col_a:
-                            pred_color = "🟢" if ml_data['ml_prediction'] == 'REAL' else "🔴" if ml_data['ml_prediction'] == 'FAKE' else "🟡"
-                            st.write(f"**ML Prediction:** {pred_color} {ml_data['ml_prediction']}")
+                            st.write(f"**ML Prediction:** {ml_data['ml_prediction']}")
                         with col_b:
                             st.write(f"**ML Confidence:** {ml_data['ml_confidence']}%")
                         with col_c:
-                            risk_color = {"CRITICAL": "🔴", "HIGH": "🟠", "MODERATE": "🟡", "LOW": "🟢"}.get(ml_data['risk_level'], "⚪")
-                            st.write(f"**Risk Level:** {risk_color} {ml_data['risk_level']}")
+                            st.write(f"**Risk Level:** {ml_data['risk_level']}")
                         
                         # Pattern Matches
                         if ml_data.get('pattern_matches'):
-                            st.write("🎯 **Misinformation Patterns Detected:**")
+                            st.write("**Misinformation Patterns Detected:**")
                             for pattern in ml_data['pattern_matches']:
                                 risk_bar = "█" * (pattern['risk_score'] // 10)
                                 st.write(f"- **{pattern['type'].replace('_', ' ').title()}**: {pattern['matches']} matches | Risk: {pattern['risk_score']}/100 {risk_bar}")
@@ -1108,7 +1104,7 @@ def main():
                         # Component 3: LLM Analysis
                         st.markdown("""
                         <div class="analysis-section">
-                            <h4>🤖 3. Large Language Model Component</h4>
+                            <h4>3. Large Language Model Component</h4>
                         </div>
                         """, unsafe_allow_html=True)
                         
@@ -1117,8 +1113,7 @@ def main():
                         if llm_data['llm_available']:
                             col_a, col_b = st.columns(2)
                             with col_a:
-                                verdict_color = "🟢" if 'TRUE' in llm_data['llm_verdict'] else "🔴" if 'FALSE' in llm_data['llm_verdict'] else "🟡"
-                                st.write(f"**LLM Verdict:** {verdict_color} {llm_data['llm_verdict']}")
+                                st.write(f"**LLM Verdict:** {llm_data['llm_verdict']}")
                             with col_b:
                                 st.write(f"**LLM Confidence:** {llm_data['llm_confidence']}%")
                             
@@ -1126,14 +1121,14 @@ def main():
                                 st.write(f"**AI Reasoning:** {llm_data['llm_reasoning']}")
                             
                             if llm_data.get('fallback_used'):
-                                st.info("🔄 Intelligent fallback analysis was used due to API limitations")
+                                st.info("Intelligent fallback analysis was used due to API limitations")
                         else:
-                            st.warning("⚠️ LLM temporarily unavailable - using intelligent fallback analysis")
+                            st.warning("LLM temporarily unavailable - using intelligent fallback analysis")
                         
                         # Component 4: Final Integration
                         st.markdown("""
                         <div class="analysis-section">
-                            <h4>⚖️ 4. Final Verdict Integration</h4>
+                            <h4>4. Final Verdict Integration</h4>
                         </div>
                         """, unsafe_allow_html=True)
                         
@@ -1144,7 +1139,7 @@ def main():
                         # System Metadata
                         st.markdown("""
                         <div class="analysis-section">
-                            <h4>🔧 System Information</h4>
+                            <h4>System Information</h4>
                         </div>
                         """, unsafe_allow_html=True)
                         
@@ -1165,7 +1160,7 @@ def main():
     
     # System status
     st.markdown("---")
-    st.markdown("### 🔧 AI System Components Status")
+    st.markdown("### AI System Components Status")
     
     col1, col2, col3, col4 = st.columns(4)
     with col1:
