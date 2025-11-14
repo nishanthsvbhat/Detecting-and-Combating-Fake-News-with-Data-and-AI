@@ -54,12 +54,19 @@ def load_ml_models():
     """Load and train ML models on real datasets"""
     try:
         # Load real datasets
+        if not os.path.exists('True.csv') or not os.path.exists('Fake.csv'):
+            st.warning("⚠️ Dataset files not found (True.csv, Fake.csv)")
+            return None
+        
         true_df = pd.read_csv('True.csv')
         fake_df = pd.read_csv('Fake.csv')
         
         # Prepare training data
-        X_real = true_df['title'] + ' ' + true_df.get('text', '')
-        X_fake = fake_df['title'] + ' ' + fake_df.get('text', '')
+        title_col = 'title' if 'title' in true_df.columns else true_df.columns[0]
+        text_col = 'text' if 'text' in true_df.columns else true_df.columns[1] if len(true_df.columns) > 1 else title_col
+        
+        X_real = (true_df[title_col].fillna('') + ' ' + true_df[text_col].fillna('').astype(str)).str[:500]
+        X_fake = (fake_df[title_col].fillna('') + ' ' + fake_df[text_col].fillna('').astype(str)).str[:500]
         
         X = pd.concat([X_real, X_fake], ignore_index=True)
         y = np.concatenate([np.ones(len(X_real)), np.zeros(len(X_fake))])
@@ -69,10 +76,10 @@ def load_ml_models():
         X_vectorized = vectorizer.fit_transform(X)
         
         # Train classifiers
-        pa_classifier = PassiveAggressiveClassifier(max_iter=1000, random_state=42)
+        pa_classifier = PassiveAggressiveClassifier(max_iter=1000, random_state=42, n_jobs=-1)
         pa_classifier.fit(X_vectorized, y)
         
-        rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
+        rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42, n_jobs=-1)
         rf_classifier.fit(X_vectorized, y)
         
         return {
@@ -86,7 +93,6 @@ def load_ml_models():
             }
         }
     except Exception as e:
-        st.warning(f"Could not load ML models: {e}")
         return None
 
 @st.cache_resource
@@ -249,18 +255,21 @@ def predict_with_ml_models(text: str) -> Dict[str, Any]:
     
     models = st.session_state.ml_models
     try:
-        X = models['vectorizer'].transform([text])
+        if len(text) < 20:
+            return None
+        
+        X = models['vectorizer'].transform([text[:5000]])
         
         # Get predictions from both models
         pa_pred = models['pa_classifier'].predict(X)[0]
-        pa_prob = models['pa_classifier'].decision_function(X)[0]
+        pa_prob = abs(models['pa_classifier'].decision_function(X)[0])
         
         rf_pred = models['rf_classifier'].predict(X)[0]
-        rf_prob = models['rf_classifier'].predict_proba(X)[0]
+        rf_proba = models['rf_classifier'].predict_proba(X)[0]
         
         # Ensemble prediction
-        avg_prob = (abs(pa_prob) + rf_prob[int(pa_pred)]) / 2
-        final_prediction = pa_pred if pa_prob > 0 else 0
+        avg_prob = (pa_prob + rf_proba[int(pa_pred)]) / 2
+        final_prediction = pa_pred if pa_prob > 0.5 else 0
         
         return {
             'is_real': final_prediction == 1,
@@ -269,43 +278,40 @@ def predict_with_ml_models(text: str) -> Dict[str, Any]:
             'rf_prediction': 'REAL' if rf_pred == 1 else 'FAKE'
         }
     except Exception as e:
-        st.error(f"ML prediction error: {e}")
         return None
 
 def analyze_with_gemini(text: str, prediction: Dict) -> str:
     """Get detailed analysis from Gemini LLM"""
     if not st.session_state.gemini_client:
-        return "LLM analysis unavailable. Configure GEMINI_API_KEY in .env file."
+        return "ℹ️ LLM analysis unavailable. Configure GEMINI_API_KEY in .env file."
     
     try:
         model = genai.GenerativeModel('gemini-pro')
         
-        prompt = f"""
-Analyze this article text for misinformation. Be concise but thorough.
+        prompt = f"""Analyze this article for misinformation. Be brief.
 
-ARTICLE TEXT:
+ARTICLE TEXT (First 1000 chars):
 {text[:1000]}
 
 ML PREDICTION: {'REAL NEWS' if prediction['is_real'] else 'FAKE NEWS'} (Confidence: {prediction['confidence']:.1f}%)
 
-Please provide:
-1. **Summary**: One-line assessment
-2. **Red Flags**: Any warning signs detected
-3. **Credibility Markers**: Positive indicators if real, or manipulation tactics if fake
-4. **Recommendation**: Should users trust this?
+Provide briefly:
+1. **Assessment**: One-line summary
+2. **Red Flags**: Any warning signs
+3. **Credibility**: Positive if real, manipulation tactics if fake
+4. **Recommendation**: Trust or verify?
 
-Format as clear bullet points.
-"""
+Keep response under 300 words."""
         
         response = model.generate_content(prompt, stream=False)
-        return response.text
+        return response.text if response else "Unable to generate analysis"
     except Exception as e:
-        return f"LLM analysis failed: {str(e)}"
+        return f"LLM analysis unavailable: Check API key and quota"
 
 def fetch_related_articles(query: str) -> List[Dict]:
     """Fetch related articles from NewsAPI"""
     api_key = get_newsapi_key()
-    if not api_key:
+    if not api_key or len(api_key) < 10:
         return []
     
     try:
@@ -318,12 +324,15 @@ def fetch_related_articles(query: str) -> List[Dict]:
             'apiKey': api_key
         }
         
-        response = requests.get(url, params=params, timeout=10)
+        response = requests.get(url, params=params, timeout=5)
         if response.status_code == 200:
-            articles = response.json().get('articles', [])
-            return articles[:5]
+            data = response.json()
+            if data.get('articles'):
+                return data['articles'][:5]
+    except requests.exceptions.Timeout:
+        return []
     except Exception as e:
-        st.warning(f"NewsAPI fetch failed: {str(e)}")
+        return []
     
     return []
 
@@ -392,7 +401,7 @@ with tab1:
         url = st.text_input("Enter article URL:")
         if url:
             try:
-                response = requests.get(url, timeout=10)
+                response = requests.get(url, timeout=5, headers={'User-Agent': 'Mozilla/5.0'})
                 if response.status_code == 200:
                     # Simple text extraction from HTML
                     from html.parser import HTMLParser
@@ -401,24 +410,31 @@ with tab1:
                             super().__init__()
                             self.text = []
                         def handle_data(self, data):
-                            if data.strip():
+                            if data and data.strip() and len(data.strip()) > 5:
                                 self.text.append(data.strip())
                     
                     parser = TextExtractor()
-                    parser.feed(response.text)
+                    try:
+                        parser.feed(response.text)
+                    except:
+                        pass
                     article_text = ' '.join(parser.text)[:5000]
                     article_source = url
+                else:
+                    st.error(f"Failed to fetch URL (Status: {response.status_code})")
+            except requests.exceptions.Timeout:
+                st.error("URL fetch timed out. Try again.")
             except Exception as e:
-                st.error(f"Could not fetch URL: {e}")
+                st.error(f"Could not fetch URL: {str(e)[:100]}")
     
     elif input_method == "📤 Upload File":
-        uploaded_file = st.file_uploader("Upload text file", type=['txt', 'pdf'])
+        uploaded_file = st.file_uploader("Upload text file", type=['txt'])
         if uploaded_file:
             try:
                 article_text = uploaded_file.read().decode('utf-8')
                 article_source = uploaded_file.name
             except Exception as e:
-                st.error(f"Could not read file: {e}")
+                st.error(f"Could not read file: {str(e)[:100]}")
     
     # Analyze button
     if st.button("🚀 Analyze Article", use_container_width=True, type="primary"):
