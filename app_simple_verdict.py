@@ -217,8 +217,8 @@ if demo_btn and 'demo_text' in st.session_state:
     text_input = st.session_state.demo_text
 
 if analyze_btn:
-    if len(text_input.strip()) < 3:
-        st.warning("⚠️ Please enter at least 3 characters")
+    if len(text_input.strip()) == 0:
+        st.warning("⚠️ Please enter some text to analyze")
     else:
         st.markdown("---")
         

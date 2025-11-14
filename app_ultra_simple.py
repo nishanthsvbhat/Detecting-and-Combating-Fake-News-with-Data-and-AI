@@ -76,7 +76,7 @@ if demo:
     Shocking revelations emerged about massive financial scandal with billions in offshore accounts.
     Investigators call it the biggest financial crime ever. Everyone knows this will destroy the company."""
 
-if analyze and text and len(text.strip()) >= 3:
+if analyze and text and len(text.strip()) > 0:
     model, vectorizer = load_models()
     
     if model and vectorizer:
