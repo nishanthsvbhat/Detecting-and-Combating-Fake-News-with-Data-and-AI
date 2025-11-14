@@ -437,74 +437,84 @@ with tab1:
                 st.error(f"Could not read file: {str(e)[:100]}")
     
     # Analyze button
-    if st.button("🚀 Analyze Article", use_container_width=True, type="primary"):
-        if not article_text or len(article_text) < 50:
-            st.error("❌ Please provide at least 50 characters of text for analysis.")
-        else:
-            with st.spinner("🔄 Analyzing... (ML + LLM + NewsAPI)"):
-                # ML Analysis
-                ml_result = predict_with_ml_models(article_text)
+    # Show character count
+    char_count = len(article_text) if article_text else 0
+    if article_text:
+        col_info1, col_info2 = st.columns([0.7, 0.3])
+        with col_info1:
+            st.caption(f"📝 Characters: {char_count}")
+        with col_info2:
+            if char_count < 50:
+                st.caption(f"⏳ Need {50 - char_count} more characters")
+    
+    # Analyze button with validation
+    analyze_disabled = not article_text or len(article_text) < 50
+    
+    if st.button("🚀 Analyze Article", use_container_width=True, type="primary", disabled=analyze_disabled):
+        with st.spinner("🔄 Analyzing... (ML + LLM + NewsAPI)"):
+            # ML Analysis
+            ml_result = predict_with_ml_models(article_text)
+            
+            if ml_result:
+                # Display verdict
+                col1, col2, col3 = st.columns(3)
                 
-                if ml_result:
-                    # Display verdict
-                    col1, col2, col3 = st.columns(3)
-                    
-                    with col1:
-                        is_real = ml_result['is_real']
-                        verdict_text = "✅ LIKELY REAL NEWS" if is_real else "❌ LIKELY FAKE NEWS"
-                        verdict_class = "verdict-real" if is_real else "verdict-fake"
-                        st.markdown(f'<div class="{verdict_class}">{verdict_text}</div>', unsafe_allow_html=True)
-                    
-                    with col2:
-                        st.metric("Confidence", f"{ml_result['confidence']:.1f}%")
-                    
-                    with col3:
-                        risk_level = "🟢 LOW" if ml_result['confidence'] < 50 else "🟡 MEDIUM" if ml_result['confidence'] < 80 else "🔴 HIGH"
-                        st.metric("Risk Level", risk_level)
-                    
-                    # Model breakdown
-                    st.markdown("### 🤖 ML Model Analysis")
-                    st.write(f"""
-                    - **PassiveAggressive Classifier**: {ml_result['pa_prediction']}
-                    - **RandomForest Classifier**: {ml_result['rf_prediction']}
-                    - **Ensemble Decision**: {'REAL' if ml_result['is_real'] else 'FAKE'}
-                    """)
-                    
-                    # LLM Analysis
-                    st.markdown("### 🧠 AI Analysis (Gemini)")
-                    llm_analysis = analyze_with_gemini(article_text, ml_result)
-                    st.markdown(llm_analysis)
-                    
-                    # NewsAPI Verification
-                    st.markdown("### 📰 Related Articles (NewsAPI)")
-                    keywords = article_text.split()[:5]
-                    query = ' '.join(keywords)
-                    articles = fetch_related_articles(query)
-                    
-                    if articles:
-                        for i, article in enumerate(articles, 1):
-                            col1, col2 = st.columns([0.8, 0.2])
-                            with col1:
-                                st.markdown(f"""
-                                **{i}. {article.get('title', 'N/A')[:80]}**
-                                
-                                Source: {article.get('source', {}).get('name', 'Unknown')}
-                                
-                                {article.get('description', 'No description')[:150]}...
-                                """)
-                            with col2:
-                                cred = get_source_credibility(article.get('url', ''))
-                                st.metric("Trust Score", f"{cred}%")
-                    else:
-                        st.info("ℹ️ No related articles found. Configure NewsAPI key for verification.")
-                    
-                    # Save to history
-                    st.session_state.analysis_history.append({
-                        'timestamp': datetime.now(),
-                        'text': article_text[:100],
-                        'verdict': 'REAL' if ml_result['is_real'] else 'FAKE',
-                        'confidence': ml_result['confidence']
-                    })
+                with col1:
+                    is_real = ml_result['is_real']
+                    verdict_text = "✅ LIKELY REAL NEWS" if is_real else "❌ LIKELY FAKE NEWS"
+                    verdict_class = "verdict-real" if is_real else "verdict-fake"
+                    st.markdown(f'<div class="{verdict_class}">{verdict_text}</div>', unsafe_allow_html=True)
+                
+                with col2:
+                    st.metric("Confidence", f"{ml_result['confidence']:.1f}%")
+                
+                with col3:
+                    risk_level = "🟢 LOW" if ml_result['confidence'] < 50 else "🟡 MEDIUM" if ml_result['confidence'] < 80 else "🔴 HIGH"
+                    st.metric("Risk Level", risk_level)
+                
+                # Model breakdown
+                st.markdown("### 🤖 ML Model Analysis")
+                st.write(f"""
+                - **PassiveAggressive Classifier**: {ml_result['pa_prediction']}
+                - **RandomForest Classifier**: {ml_result['rf_prediction']}
+                - **Ensemble Decision**: {'REAL' if ml_result['is_real'] else 'FAKE'}
+                """)
+                
+                # LLM Analysis
+                st.markdown("### 🧠 AI Analysis (Gemini)")
+                llm_analysis = analyze_with_gemini(article_text, ml_result)
+                st.markdown(llm_analysis)
+                
+                # NewsAPI Verification
+                st.markdown("### 📰 Related Articles (NewsAPI)")
+                keywords = article_text.split()[:5]
+                query = ' '.join(keywords)
+                articles = fetch_related_articles(query)
+                
+                if articles:
+                    for i, article in enumerate(articles, 1):
+                        col1, col2 = st.columns([0.8, 0.2])
+                        with col1:
+                            st.markdown(f"""
+                            **{i}. {article.get('title', 'N/A')[:80]}**
+                            
+                            Source: {article.get('source', {}).get('name', 'Unknown')}
+                            
+                            {article.get('description', 'No description')[:150]}...
+                            """)
+                        with col2:
+                            cred = get_source_credibility(article.get('url', ''))
+                            st.metric("Trust Score", f"{cred}%")
+                else:
+                    st.info("ℹ️ No related articles found. Configure NewsAPI key for verification.")
+                
+                # Save to history
+                st.session_state.analysis_history.append({
+                    'timestamp': datetime.now(),
+                    'text': article_text[:100],
+                    'verdict': 'REAL' if ml_result['is_real'] else 'FAKE',
+                    'confidence': ml_result['confidence']
+                })
 
 # ============================================================================
 # TAB 2: DASHBOARD
