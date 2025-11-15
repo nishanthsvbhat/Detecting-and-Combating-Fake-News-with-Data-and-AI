@@ -303,14 +303,14 @@ class FakeNewsDetector:
         """Convert prediction to human-readable verdict"""
         if prediction == 1:  # Real
             if confidence > 85:
-                return VerDict.REAL.value
+                return Verdict.REAL.value
             else:
-                return VerDict.LIKELY_REAL.value
+                return Verdict.LIKELY_REAL.value
         else:  # Fake
             if confidence > 85:
-                return VerDict.FAKE.value
+                return Verdict.FAKE.value
             else:
-                return VerDict.LIKELY_FAKE.value
+                return Verdict.LIKELY_FAKE.value
 
 def get_source_credibility(url: str) -> Tuple[str, int]:
     """Get credibility score for a news source"""
@@ -493,13 +493,11 @@ def render_analysis_results(text: str):
         
         # Confidence bar
         st.markdown("### Confidence Score")
-        st.markdown(f"""
-        <div class="confidence-bar">
-            <div class="confidence-fill" style="width: {confidence}%">
-                {confidence:.1f}%
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        col_conf_label, col_conf_value = st.columns([0.7, 0.3])
+        with col_conf_label:
+            st.progress(confidence / 100.0)
+        with col_conf_value:
+            st.metric("Score", f"{confidence:.1f}%")
         
         # Detailed analysis
         col1, col2, col3 = st.columns(3)
@@ -537,17 +535,21 @@ def render_analysis_results(text: str):
             api_key = os.getenv('NEWS_API_KEY', '')
             if api_key:
                 articles = fetch_related_articles(text[:50], api_key)
-                for article in articles:
-                    source, cred = get_source_credibility(article['url'])
-                    st.markdown(f"""
-                    <div class="source-card">
-                        <strong>{article['title'][:60]}...</strong><br>
-                        Source: {article['source']} | Credibility: {cred}%<br>
-                        <small>{article['publishedAt']}</small>
-                    </div>
-                    """, unsafe_allow_html=True)
+                if articles:
+                    for article in articles:
+                        if article.get('url'):
+                            source, cred = get_source_credibility(article['url'])
+                            st.markdown(f"""
+                            <div class="source-card">
+                                <strong>{article.get('title', 'No title')[:60]}...</strong><br>
+                                Source: {article.get('source', 'Unknown')} | Credibility: {cred}%<br>
+                                <small>{article.get('publishedAt', 'No date')}</small>
+                            </div>
+                            """, unsafe_allow_html=True)
+                else:
+                    st.info("No related articles found. Try another search term.")
             else:
-                st.info("NewsAPI key not configured")
+                st.warning("⚠️ NewsAPI key not configured. News verification disabled.")
         
         with tabs[2]:
             st.markdown("**Risk Factors:**")

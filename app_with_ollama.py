@@ -77,7 +77,7 @@ st.markdown("""
 # CONSTANTS
 # ============================================================================
 
-MIN_TEXT_LENGTH = 50
+MIN_TEXT_LENGTH = 1  # No minimum - analyze any text!
 MAX_TEXT_LENGTH = 10000
 
 BIAS_KEYWORDS = {
@@ -431,8 +431,10 @@ def main():
         
         # Character count
         char_count = len(text_input)
-        if char_count < MIN_TEXT_LENGTH:
-            st.info(f"📝 {char_count}/{MIN_TEXT_LENGTH} characters (need {MIN_TEXT_LENGTH - char_count} more)")
+        if char_count == 0:
+            st.info("📝 Start typing to analyze...")
+        else:
+            st.info(f"📝 {char_count}/{MAX_TEXT_LENGTH} characters")
     
     with col2:
         st.subheader("⚙️ Options")
@@ -475,8 +477,8 @@ def main():
     # ================================================================
     
     if analyze_button:
-        if char_count < MIN_TEXT_LENGTH:
-            st.error(f"❌ Please provide at least {MIN_TEXT_LENGTH} characters of text")
+        if char_count < 1:
+            st.warning("⚠️ Please enter some text to analyze")
         elif char_count > MAX_TEXT_LENGTH:
             st.error(f"❌ Text exceeds {MAX_TEXT_LENGTH} characters")
         else:

@@ -661,13 +661,6 @@ class MaxAccuracyMisinformationSystem:
                     has_false_political_claims = True
                     break
         
-        # CRITICAL: Specific checks for known false claims
-        specific_false_checks = [
-            'revanna is the new pm',
-            'rahul gandhi is the new pm',
-            'revanna new pm',
-            'rahul gandhi new pm'
-        ]
         
         for false_claim in specific_false_checks:
             if false_claim in content_text:
