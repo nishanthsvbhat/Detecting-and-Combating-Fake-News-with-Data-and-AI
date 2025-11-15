@@ -48,15 +48,15 @@ Configuration:
 # LOAD DATA
 # ============================================================================
 
-print("\n📊 Loading data...")
+print("\n[*] Loading data...")
 
 try:
     true_df = pd.read_csv('True.csv')
     fake_df = pd.read_csv('Fake.csv')
-    print(f"✅ True articles: {len(true_df)}")
-    print(f"✅ Fake articles: {len(fake_df)}")
+    print(f"[+] True articles: {len(true_df)}")
+    print(f"[+] Fake articles: {len(fake_df)}")
 except FileNotFoundError as e:
-    print(f"❌ Error: {e}")
+    print(f"[-] Error: {e}")
     print("Please ensure True.csv and Fake.csv are in current directory")
     exit(1)
 
@@ -80,9 +80,9 @@ for idx, row in fake_df.iterrows():
     texts.append(text[:512])
     labels.append(0)
 
-print(f"\n✅ Total samples: {len(texts)}")
-print(f"   Real: {sum(labels)}")
-print(f"   Fake: {len(texts) - sum(labels)}")
+print(f"\n[+] Total samples: {len(texts)}")
+print(f"    Real: {sum(labels)}")
+print(f"    Fake: {len(texts) - sum(labels)}")
 
 # ============================================================================
 # TRAIN/TEST SPLIT
@@ -94,15 +94,15 @@ X_train, X_test, y_train, y_test = train_test_split(
     texts, labels, test_size=0.2, random_state=42, stratify=labels
 )
 
-print(f"\n📈 Train/Test Split:")
-print(f"   Train: {len(X_train)} samples")
-print(f"   Test: {len(X_test)} samples")
+print(f"\n[*] Train/Test Split:")
+print(f"    Train: {len(X_train)} samples")
+print(f"    Test: {len(X_test)} samples")
 
 # ============================================================================
 # TOKENIZATION
 # ============================================================================
 
-print(f"\n🔤 Loading tokenizer: {MODEL_NAME}")
+print(f"\n[*] Loading tokenizer: {MODEL_NAME}")
 tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
 
 def tokenize_function(examples):
@@ -124,14 +124,14 @@ test_dataset = Dataset.from_dict({
     'label': y_test
 })
 
-print("🔄 Tokenizing train dataset...")
+print("[*] Tokenizing train dataset...")
 train_dataset = train_dataset.map(
     tokenize_function,
     batched=True,
     remove_columns=['text']
 )
 
-print("🔄 Tokenizing test dataset...")
+print("[*] Tokenizing test dataset...")
 test_dataset = test_dataset.map(
     tokenize_function,
     batched=True,
@@ -142,14 +142,14 @@ test_dataset = test_dataset.map(
 # LOAD MODEL
 # ============================================================================
 
-print(f"\n🤖 Loading model: {MODEL_NAME}")
+print(f"\n[*] Loading model: {MODEL_NAME}")
 model = AutoModelForSequenceClassification.from_pretrained(
     MODEL_NAME,
     num_labels=2
 )
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print(f"💻 Device: {device}")
+print(f"[*] Device: {device}")
 model.to(device)
 
 # ============================================================================
@@ -175,7 +175,7 @@ training_args = TrainingArguments(
 # TRAINER
 # ============================================================================
 
-print("\n⚙️ Setting up trainer...")
+print("\n[*] Setting up trainer...")
 
 trainer = Trainer(
     model=model,
@@ -190,7 +190,7 @@ trainer = Trainer(
 # ============================================================================
 
 print("\n" + "=" * 80)
-print("🚀 STARTING TRAINING")
+print("STARTING TRAINING")
 print("=" * 80)
 
 trainer.train()
@@ -200,7 +200,7 @@ trainer.train()
 # ============================================================================
 
 print("\n" + "=" * 80)
-print("📊 EVALUATION")
+print("EVALUATION RESULTS")
 print("=" * 80)
 
 eval_results = trainer.evaluate()
@@ -212,12 +212,12 @@ print(f"  Loss: {eval_results.get('eval_loss', 'N/A'):.4f}")
 # SAVE MODEL
 # ============================================================================
 
-print(f"\n💾 Saving model to {OUTPUT_DIR}")
+print(f"\n[*] Saving model to {OUTPUT_DIR}")
 model.save_pretrained(OUTPUT_DIR)
 tokenizer.save_pretrained(OUTPUT_DIR)
 
 print(f"""
-✅ MODEL TRAINING COMPLETE!
+[+] MODEL TRAINING COMPLETE!
 
 Model saved to: {OUTPUT_DIR}
 
@@ -239,7 +239,7 @@ To use the model:
 # ============================================================================
 
 print("\n" + "=" * 80)
-print("🧪 INFERENCE TEST")
+print("INFERENCE TEST")
 print("=" * 80)
 
 from transformers import pipeline
@@ -261,10 +261,10 @@ for text in test_texts:
     result = classifier(text[:512])
     label = "REAL" if result[0]['label'] == 'LABEL_1' else "FAKE"
     confidence = result[0]['score']
-    print(f"\n📝 Text: {text[:50]}...")
-    print(f"   Verdict: {label}")
-    print(f"   Confidence: {confidence:.2%}")
+    print(f"\n[*] Text: {text[:50]}...")
+    print(f"    Verdict: {label}")
+    print(f"    Confidence: {confidence:.2%}")
 
 print("\n" + "=" * 80)
-print("✅ TRAINING COMPLETE!")
+print("[+] TRAINING COMPLETE!")
 print("=" * 80)

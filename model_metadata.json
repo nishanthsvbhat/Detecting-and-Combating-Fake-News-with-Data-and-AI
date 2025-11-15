@@ -1,0 +1,25 @@
+{
+  "datasets_used": [
+    "WELFake",
+    "Original"
+  ],
+  "total_articles_trained": 57748,
+  "vocabulary_size": 2000,
+  "accuracy": 0.9586147186147186,
+  "precision": 0.9512693814959959,
+  "recall": 0.9667532467532467,
+  "f1_score": 0.9589488148402611,
+  "test_set_size": 11550,
+  "ngrams": [
+    1,
+    2
+  ],
+  "max_features": 2000,
+  "individual_model_scores": {
+    "LogisticRegression": 0.9431168831168831,
+    "RandomForest": 0.952034632034632,
+    "GradientBoosting": 0.9470995670995671,
+    "XGBoost": 0.9632034632034632,
+    "NaiveBayes": 0.8478787878787879
+  }
+}
